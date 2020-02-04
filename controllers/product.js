@@ -1,4 +1,5 @@
 const _ = require('lodash')
+const Product = require('../models/products.js')
 
 
 const product = app => {
@@ -6,30 +7,43 @@ const product = app => {
 
     //create
     app.post('/api/products', (req, res) => {
-        _product.push(req.body)
-        res.json({'info': 'Product Created'})
+        const newProduct = new Product(req.body)
+        newProduct.save().then(() => {
+            res.json({'info': 'Product Created'})
+        })
+        .catch(err => {
+            console.error(err)
+        })
+
     })
 
     //read
     app.get('/api/products', (req, res) => {
-        res.send(_product)        
+        Product.find().then(products => {
+            res.send(products)
+        })
     })
 
     //update
     app.put('/api/products/:id', (req, res) => {
-        const index = _.findIndex(_product, {
-            id: parseInt(req.params.id)
+        Product.update({_id: req.params.id}, req.body)
+        .then(() => {
+            res.json({"info":"Product Updated"})
         })
-        _.merge(_product[index], req.body)
-        res.json({"info":"Product Updated"})
+        .catch(err => {
+            console.error(err)
+        })
     })
 
     //delete
     app.delete('/api/products/:id', (req, res) => {
-        _.remove(_product, product => {
-            return product.id === parseInt(req.params.id)
+        Product.remove({_id: req.params.id})
+        .then(() => {
+            res.json({"info": "Product Deleted!"})
         })
-        res.json({"info": "Product Deleted!"})
+        .catch(err => {
+            console.error(err)
+        })
     })
 }
 
